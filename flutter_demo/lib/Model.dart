@@ -1,29 +1,40 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 ///Counter model
 
 
-class CounterModel extends InheritedWidget {
+// class CounterModel extends InheritedWidget {
+//
+//   final int number;
+//
+//   CounterModel({ Key key, @required Widget child, @required int number}):
+//         assert(child != null),
+//         this.number = number,
+//         super(key: key, child: child);
+//
+//   static CounterModel of(BuildContext context) {
+//     return context.dependOnInheritedWidgetOfExactType<CounterModel>();
+//   }
+//
+//   @override
+//   bool updateShouldNotify(CounterModel old) {
+//     final isNotify = number != old.number;
+//     print("update should notify: $isNotify");
+//     return isNotify;
+//   }
+// }
 
-  final int number;
+class CounterModel extends ChangeNotifier {
+  int number = 0;
 
-  CounterModel({ Key key, @required Widget child, @required int number}):
-        assert(child != null),
-        this.number = number,
-        super(key: key, child: child);
+  CounterModel();
 
-  static CounterModel of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<CounterModel>();
+  void increment() {
+    number++;
+    notifyListeners();
   }
-
-  @override
-  bool updateShouldNotify(CounterModel old) {
-    final isNotify = number != old.number;
-    print("update should notify: $isNotify");
-    return isNotify;
+  void decrease() {
+    number--;
+    notifyListeners();
   }
-}
-
-class CounterNotification extends Notification {
-
 }

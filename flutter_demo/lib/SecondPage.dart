@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/ThirdPage.dart';
+import 'package:provider/provider.dart';
 import 'Model.dart';
 import 'ThirdPage.dart';
 
@@ -9,7 +10,6 @@ class SecondPage extends StatefulWidget {
 }
 
 class _SecondPageState extends State<SecondPage> {
-
   int _counter = 0;
 
   @override
@@ -17,21 +17,15 @@ class _SecondPageState extends State<SecondPage> {
     super.initState();
   }
 
-  void setCounter() {
-    setState(() {
-      _counter--;
-      CounterNotification().dispatch(context);
-    });
-  }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _counter = CounterModel.of(context).number;
   }
 
   @override
   Widget build(BuildContext context) {
+    //watch方法必须在build或provide的update回调方法中调用
+    var model = context.watch<CounterModel>();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.lightGreen,
@@ -41,17 +35,25 @@ class _SecondPageState extends State<SecondPage> {
         child: Center(
           child: Column(
             children: [
-              Text('$_counter'),
-              RaisedButton(onPressed: (){
+              Consumer<CounterModel>(
+                  builder: (_, model, child) {
+                    print("second page update: ${model.number}");
+                    return Text("${model.number}");
+                  },
+                  // child: Text('$_counter')
+              ),
+              RaisedButton(onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return CounterModel(child: ThirdPage(), number: _counter);
+                  return ChangeNotifierProvider.value(
+                      value: model,
+                      child: ThirdPage());
                 }));
               }),
               RaisedButton(
-                child: Text("Subtract number"),
-                  onPressed: (){
-                    setCounter();
-              })
+                  child: Text("Subtract number"),
+                  onPressed: () {
+                    model.decrease();
+                  })
             ],
           ),
         ),

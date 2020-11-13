@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'SecondPage.dart';
 import 'Model.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(MyApp());
@@ -53,24 +54,17 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  // int _counter = 0;
 
   void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+    // setState(() {
+    //   _counter++;
+    // });
+    //改变model只会刷新需要修改的widget;不用调用setState而刷新全部widget
+    model.increment();
   }
 
-  void _decreaseConter() {
-    setState(() {
-      _counter--;
-    });
-  }
+  var model = CounterModel();
 
   @override
   Widget build(BuildContext context) {
@@ -80,14 +74,9 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-
-    return NotificationListener<CounterNotification>(
-      //这里的NotificationListener无效
-      onNotification: (_) {
-        print("get notification1");
-        _decreaseConter();
-        return false;
-      },
+  print("build app");
+    return ChangeNotifierProvider<CounterModel>(
+      create: (_)=>model,
       child: Scaffold(
         appBar: AppBar(
           // Here we take the value from the MyHomePage object that was created by
@@ -117,20 +106,20 @@ class _MyHomePageState extends State<MyHomePage> {
               Text(
                 'You have pushed the button this many times:',
               ),
-              Text(
-                '$_counter',
-                style: Theme.of(context).textTheme.headline4,
+              Consumer<CounterModel>(
+                builder: (context, model, child){
+                  return Text(
+                    '${model.number}',
+                    style: Theme.of(context).textTheme.headline4,
+                  );
+                },
               ),
               RaisedButton(onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) {
-                  return NotificationListener<CounterNotification>(
-                      onNotification: (_) {
-                        print("get notification2");
-                        _decreaseConter();
-                        return true;
-                      },
-                      child:
-                          CounterModel(child: SecondPage(), number: _counter)
+                  //如果使用同一个数据源需要使用ChangeNotifierProvider.value
+                  return ChangeNotifierProvider.value(
+                      value: model,
+                      child: SecondPage()
                   );
                 }));
               })
