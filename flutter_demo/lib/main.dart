@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:mobx/mobx.dart';
 import 'SecondPage.dart';
-import 'Model.dart';
-import 'package:provider/provider.dart';
+import 'Counter.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 void main() {
   runApp(MyApp());
@@ -54,84 +56,67 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  // int _counter = 0;
+  var counterStore = Counter();
 
   void _incrementCounter() {
-    // setState(() {
-    //   _counter++;
-    // });
-    //改变model只会刷新需要修改的widget;不用调用setState而刷新全部widget
-    model.increment();
+    counterStore.increment();
   }
 
-  var model = CounterModel();
+  var showToast;
+
+
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+
+    showToast = when((_){
+      return this.counterStore.number == "10";
+    }, () {
+      print("xxxxxx number=10");
+      Fluttertoast.showToast(msg: "The number is 10");
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-  print("build app");
-    return ChangeNotifierProvider<CounterModel>(
-      create: (_)=>model,
-      child: Scaffold(
-        appBar: AppBar(
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
-          title: Text(widget.title),
-        ),
-        body: Center(
-          // Center is a layout widget. It takes a single child and positions it
-          // in the middle of the parent.
-          child: Column(
-            // Column is also a layout widget. It takes a list of children and
-            // arranges them vertically. By default, it sizes itself to fit its
-            // children horizontally, and tries to be as tall as its parent.
-            //
-            // Invoke "debug painting" (press "p" in the console, choose the
-            // "Toggle Debug Paint" action from the Flutter Inspector in Android
-            // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-            // to see the wireframe for each widget.
-            //
-            // Column has various properties to control how it sizes itself and
-            // how it positions its children. Here we use mainAxisAlignment to
-            // center the children vertically; the main axis here is the vertical
-            // axis because Columns are vertical (the cross axis would be
-            // horizontal).
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                'You have pushed the button this many times:',
-              ),
-              Consumer<CounterModel>(
-                builder: (context, model, child){
-                  return Text(
-                    '${model.number}',
-                    style: Theme.of(context).textTheme.headline4,
-                  );
-                },
-              ),
-              RaisedButton(onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) {
-                  //如果使用同一个数据源需要使用ChangeNotifierProvider.value
-                  return ChangeNotifierProvider.value(
-                      value: model,
-                      child: SecondPage()
-                  );
-                }));
-              })
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _incrementCounter,
-          tooltip: 'Increment',
-          child: Icon(Icons.add),
-        ), // This trailing comma makes auto-formatting nicer for build methods.
+
+    print("build app");
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
       ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Observer(
+              builder:(_){
+                print("xxxxxxx change number");
+                //如果这个Block中没有使用store那么就不会触发响应。
+                return Text(
+                  '${counterStore.number}',
+                  style: Theme.of(context).textTheme.headline4,
+                );
+              },
+            ),
+            Text(
+              'You have pushed the button this many times:',
+            ),
+            RaisedButton(onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) {
+                //如果使用同一个数据源需要使用ChangeNotifierProvider.value
+                return SecondPage(counterStore);
+              }));
+            })
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: 'Increment',
+        child: Icon(Icons.add),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

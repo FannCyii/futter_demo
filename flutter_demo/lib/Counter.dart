@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
-
-///Counter model
+import 'package:mobx/mobx.dart';
 
 
 // class CounterModel extends InheritedWidget {
@@ -24,17 +23,39 @@ import 'package:flutter/foundation.dart';
 //   }
 // }
 
-class CounterModel extends ChangeNotifier {
-  int number = 0;
+// class CounterModel extends ChangeNotifier {
+//   int number = 0;
+//
+//   CounterModel();
+//
+//   void increment() {
+//     number++;
+//     notifyListeners();
+//   }
+//   void decrease() {
+//     number--;
+//     notifyListeners();
+//   }
+// }
 
-  CounterModel();
+part 'Counter.g.dart';
 
+class Counter = _Counter with _$Counter;
+
+abstract class _Counter with Store {
+  @observable
+  int _value = 0;
+
+  @action
   void increment() {
-    number++;
-    notifyListeners();
+    _value++;
   }
+
+  @action
   void decrease() {
-    number--;
-    notifyListeners();
+    _value--;
   }
+
+  @computed
+  String get number => "$_value";
 }

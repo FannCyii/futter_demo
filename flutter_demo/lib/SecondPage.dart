@@ -1,31 +1,25 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/ThirdPage.dart';
-import 'package:provider/provider.dart';
-import 'Model.dart';
+import 'Counter.dart';
 import 'ThirdPage.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 
 class SecondPage extends StatefulWidget {
+  Counter _counterStore;
+  SecondPage(this._counterStore);
   @override
   _SecondPageState createState() => _SecondPageState();
 }
 
 class _SecondPageState extends State<SecondPage> {
-  int _counter = 0;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
 
   @override
   Widget build(BuildContext context) {
     //watch方法必须在build或provide的update回调方法中调用
-    var model = context.watch<CounterModel>();
+    // var model = context.watch<CounterModel>();
+    print("second page");
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.lightGreen,
@@ -35,29 +29,31 @@ class _SecondPageState extends State<SecondPage> {
         child: Center(
           child: Column(
             children: [
-              Consumer<CounterModel>(
-                  builder: (_, model, child) {
-                    print("second page update: ${model.number}");
-                    return Text("${model.number}");
-                  },
-                  // child: Text('$_counter')
-              ),
+              Observer(builder: (context){
+                return Text("${widget._counterStore.number}");
+              }),
               RaisedButton(onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return ChangeNotifierProvider.value(
-                      value: model,
-                      child: ThirdPage());
+                  return ThirdPage(widget._counterStore);
                 }));
               }),
               RaisedButton(
-                  child: Text("Subtract number"),
+                  child: Text("+ number"),
                   onPressed: () {
-                    model.decrease();
+                    //do something
+                    widget._counterStore.increment();
                   })
             ],
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    print("second is disposed");
   }
 }
